@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+# 数据加载器
 import numpy as np
 import random
 import json
@@ -24,11 +26,12 @@ class KinectDataLoader:
                     self.x_batches.append(np.array(temp_batch_x))
                     self.y_batches.append(np.array(
                         {
-                            'right_hand': [1, 0, 0, 0, 0],
-                            'left_hand': [0, 1, 0, 0, 0],
-                            'right_foot': [0, 0, 1, 0, 0],
-                            'left_foot': [0, 0, 0, 1, 0],
-                            'defence': [0, 0, 0, 0, 1]
+                            'right_hand': [1, 0, 0, 0, 0, 0],
+                            'left_hand': [0, 1, 0, 0, 0, 0],
+                            'right_foot': [0, 0, 1, 0, 0, 0],
+                            'left_foot': [0, 0, 0, 1, 0, 0],
+                            'defence': [0, 0, 0, 0, 1, 0],
+                            'idle': [0, 0, 0, 0, 0, 1]
                         }[i[0].split('/')[2]]))
     
     def next_batch(self, batch_size):
@@ -39,3 +42,18 @@ class KinectDataLoader:
             x.append(self.x_batches[ri])
             y.append(self.y_batches[ri])
         return (np.array(x), np.array(y))
+    
+    def all_batches(self, each_size):
+        finished = False
+        counter = 0
+        while not finished:
+            x = []
+            y = []
+            for _ in range(each_size):
+                x.append(self.x_batches[counter])
+                y.append(self.y_batches[counter])
+                temp = counter + 1
+                counter = temp % len(self.x_batches)
+                if temp == counter:
+                    finished = True
+            yield (np.array(x), np.array(y))
