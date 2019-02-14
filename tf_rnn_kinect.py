@@ -7,8 +7,6 @@ try:
         choice = 1
     elif os.sys.argv[1] == 'valid':
         choice = 2
-    elif os.sys.argv[1] == 'test':
-        choice = 3
 except:
     print('请提供选项')
     exit(-1)
@@ -81,6 +79,8 @@ with tf.Session() as sess:
 
     if choice == 1:
         sess.run(init)
+        # model_file = tf.train.latest_checkpoint('ckpt_cnn/')
+        # saver.restore(sess, model_file)
         step = 0
         accuracy = 0
         while True:
@@ -118,11 +118,11 @@ with tf.Session() as sess:
                 max_accuracy = accuracy
                 print('Max Accuracy Updated to: ' + str(max_accuracy))
             if accuracy >= max_accuracy:
-                saver.save(sess, 'ckpt/trained.ckpt', global_step=step)
+                saver.save(sess, 'ckpt_rnn/trained.ckpt', global_step=step)
             step += 1
 
     elif choice == 2:
-        model_file = tf.train.latest_checkpoint('ckpt/')
+        model_file = tf.train.latest_checkpoint('ckpt_rnn/')
         saver.restore(sess, model_file)
         total = 0
         correct = 0
@@ -132,14 +132,9 @@ with tf.Session() as sess:
                 x: test_xs,
                 y: test_ys
             })
-            print(test_output_y)
             y_res = tf.argmax(test_ys, 1)
             output_res = tf.argmax(test_output_y, 1)
             for p, q in zip(sess.run(y_res), sess.run(output_res)):
                 total += 1
                 correct += (p == q)
         print("Accuracy: " + str(correct / total))
-    
-    elif choice == 3:
-        model_file = tf.train.latest_checkpoint('ckpt/')
-        saver.restore(sess, model_file)
