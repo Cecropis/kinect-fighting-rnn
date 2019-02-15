@@ -6,11 +6,11 @@ import json
 import os
 
 class KinectDataLoader:
-    def __init__(self):
+    def __init__(self, path='./Kinect_train/'):
         self.x_batches = []
         self.y_batches = []
         self.step_size = 200
-        for i in os.walk('./Kinect/'):
+        for i in os.walk(path):
             for j in i[2]:
                 with open(i[0] + '/' + j, 'r') as f:
                     content = ''.join(f.readlines())

@@ -6,7 +6,7 @@ import random
 
 
 origins = []
-for i in os.walk('./Kinect/'):
+for i in os.walk('./Kinect_train/'):
     for j in i[2]:
         with open(i[0] + '/' + j, 'r') as f:
             content = ''.join(f.readlines())

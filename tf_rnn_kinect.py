@@ -16,8 +16,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from kinect_data import KinectDataLoader
 
-kinect_data_loader = KinectDataLoader()
-
 lr = 0.0001  # 学习率
 training_iters = 100000  # epoch
 batch_size = 128
@@ -47,6 +45,7 @@ def RNN(X, weights, biases):
     # linear activated hidden layer
     X_in = tf.matmul(X, weights['in']) + biases['in']  # 计算出隐层输入
     X_in = tf.reshape(X_in, [-1, n_steps, n_hidden_units])  # 将隐层输入转换为 shape=(128批, 200帧, 128隐层神经元数)
+    X_in = tf.nn.dropout(X_in, keep_prob=0.9)
 
     # lstm单元
     lstm_cell = tf.nn.rnn_cell.BasicLSTMCell(n_hidden_units, forget_bias=1.0, state_is_tuple=True)
@@ -78,6 +77,7 @@ graph_cost = []
 with tf.Session() as sess:
 
     if choice == 1:
+        kinect_data_loader = KinectDataLoader()
         sess.run(init)
         # model_file = tf.train.latest_checkpoint('ckpt_cnn/')
         # saver.restore(sess, model_file)
@@ -113,15 +113,16 @@ with tf.Session() as sess:
                     total += 1
                     correct += (p == q)
                 accuracy = correct / total
-                print("Accuracy: " + str(accuracy))
+                print("Accuracy on training set: " + str(accuracy))
             if accuracy > max_accuracy:
                 max_accuracy = accuracy
-                print('Max Accuracy Updated to: ' + str(max_accuracy))
+                print('Max Accuracy has reached: ' + str(max_accuracy))
             if accuracy >= max_accuracy:
                 saver.save(sess, 'ckpt_rnn/trained.ckpt', global_step=step)
             step += 1
 
     elif choice == 2:
+        kinect_data_loader = KinectDataLoader('./Kinect_test/')
         model_file = tf.train.latest_checkpoint('ckpt_rnn/')
         saver.restore(sess, model_file)
         total = 0
@@ -137,4 +138,4 @@ with tf.Session() as sess:
             for p, q in zip(sess.run(y_res), sess.run(output_res)):
                 total += 1
                 correct += (p == q)
-        print("Accuracy: " + str(correct / total))
+        print("Accuracy on test set: " + str(correct / total))
