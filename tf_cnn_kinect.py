@@ -16,6 +16,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from kinect_data import KinectDataLoader
 
+training_loader = KinectDataLoader('./Kinect_train/')
+test_loader = KinectDataLoader('./Kinect_test/')
+
 lr = 0.00001
 training_iters = 100000
 batch_size = 128
@@ -115,7 +118,7 @@ with tf.Session() as sess:
         step = 0
         accuracy = 0
         while True:
-            batch_xs, batch_ys = kinect_data_loader.next_batch(batch_size)
+            batch_xs, batch_ys = training_loader.next_batch(batch_size)
             batch_xs = batch_xs.reshape([batch_size, n_steps, 63, 1])
             _, loss = sess.run([train_op, cost], feed_dict={
                 xs: batch_xs,
@@ -128,7 +131,7 @@ with tf.Session() as sess:
             if step % 5 == 0:
                 total = 0
                 correct = 0
-                test_xs, test_ys = kinect_data_loader.next_batch(batch_size)
+                test_xs, test_ys = training_loader.next_batch(batch_size)
                 test_xs = test_xs.reshape([batch_size, n_steps, 63, 1])
                 test_output_y = sess.run(pred, feed_dict={
                     xs: test_xs,
@@ -149,12 +152,11 @@ with tf.Session() as sess:
             step += 1
 
     elif choice == 2:
-        kinect_data_loader = KinectDataLoader('./Kinect_test/')
         model_file = tf.train.latest_checkpoint('ckpt_cnn/')
         saver.restore(sess, model_file)
         total = 0
         correct = 0
-        for test_xs, test_ys in kinect_data_loader.all_batches(batch_size):
+        for test_xs, test_ys in test_loader.all_batches(batch_size):
             test_xs = test_xs.reshape([batch_size, n_steps, 63, 1])
             test_output_y = sess.run(pred, feed_dict={
                 xs: test_xs,
